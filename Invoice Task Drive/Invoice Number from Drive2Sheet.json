@@ -1,0 +1,310 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -464,
+        -48
+      ],
+      "id": "e29b7670-84a3-4b0c-bbf7-952ba0586269",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "options": {
+          "responseFormat": "json_object"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        112,
+        192
+      ],
+      "id": "3297cfad-1929-4ff5-aff1-2f907a1abfc3",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "HtljYl8ho4bAwl5b",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "binaryPropertyName": "=data",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        -48,
+        -48
+      ],
+      "id": "55f652b1-4041-4d14-815b-d3c762de66e4",
+      "name": "Extract from File",
+      "alwaysOutputData": false,
+      "executeOnce": false,
+      "retryOnFail": false
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "1jHj36zmIKjHKWlnimqgqxlK_pib48QUY",
+          "mode": "list",
+          "cachedResultName": "Invoice.pdf",
+          "cachedResultUrl": "https://drive.google.com/file/d/1jHj36zmIKjHKWlnimqgqxlK_pib48QUY/view?usp=drivesdk"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -256,
+        -48
+      ],
+      "id": "5ab3df90-cc18-4781-9ad2-955053865908",
+      "name": "Download file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "1jd9d8BQ6CDGNX0w",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Document Text:\n{{ $json.text }}\n\nExtract ONLY the following fields and return them as ONE FLAT JSON OBJECT:\n\n{\n  \"customer_id\": \"\",\n  \"invoice_no\": \"\",\n  \"phone_no\": \"\",\n  \"email_id\": \"\",\n  \"purchase_date\": \"\",\n  \"items_purchased\": \"\",\n  \"total_cost\": \"\"\n}\n\nExtraction Rules:\n1. Look for Customer ID in ANY of these formats:\n   - \"Customer ID:\"\n   - \"CustomerID:\"\n   - \"Customer Id:\"\n   - \"Cust ID:\"\n   - \"CustomerID\"\n   - \"Customer Id\"\n   - \"Customer:\"\n     (if Customer Name and Customer ID are in same block)\n\n   If Customer ID looks like a code (ex: CUST-1234 or similar), extract it.\n   If missing, return \"\".\n\n2. invoice_no:\n   - Match formats like INV-2025-0001 or any code after \"Invoice Number:\".\n\n3. phone_no:\n   - Extract the FIRST phone-like pattern near company or customer section:\n     Example patterns:\n     +1 (555) 123-4567\n     555-123-4567\n     (555) 123-4567\n\n4. email_id:\n   - Extract any email near \"Email:\" or customer block.\n\n5. purchase_date:\n   - Extract the \"Invoice Date:\" value and normalize to YYYY-MM-DD.\n\n6. items_purchased:\n   - For each item, return: \"description x qty\"\n   - If multiple items, join with \", \"\n\n7. total_cost:\n   - Extract the “Total:” or “Invoice Value:” amount.\n   - Return as number without commas.\n\n8. If any field cannot be found, return empty string.\n\nIMPORTANT:\n- Return ONLY the JSON. No explanation, no extra text.\n",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        160,
+        -48
+      ],
+      "id": "4551df60-7649-449d-b36e-6a7e0ebe1e70",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "11jW8OX2iYgktat8UZoCh1pQ-5j2wsQJUp-apmi2dBW8",
+          "mode": "list",
+          "cachedResultName": "n8n sheet",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/11jW8OX2iYgktat8UZoCh1pQ-5j2wsQJUp-apmi2dBW8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1244146215,
+          "mode": "list",
+          "cachedResultName": "S2C",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/11jW8OX2iYgktat8UZoCh1pQ-5j2wsQJUp-apmi2dBW8/edit#gid=1244146215"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Invoice no": "={{ $json.invoice_no }}",
+            "Purchase date": "={{ $json.purchase_date }}",
+            "Total cost": "={{ $json.total_cost }}",
+            "Items Purchased + count": "={{ $json.items_purchased }}",
+            "Phone no": "={{ $json.phone_no }}",
+            "Email ID": "={{ $json.email_id }}",
+            "Customer Id": "={{ $json.customer_id }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Customer Id",
+              "displayName": "Customer Id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Invoice no",
+              "displayName": "Invoice no",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Phone no",
+              "displayName": "Phone no",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email ID",
+              "displayName": "Email ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Purchase date",
+              "displayName": "Purchase date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Items Purchased + count",
+              "displayName": "Items Purchased + count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Total cost",
+              "displayName": "Total cost",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        704,
+        -48
+      ],
+      "id": "3f89b8e0-b84d-44c8-87c7-6c177eb958e7",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "OmTFsdLdtVelEgPT",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Read the JSON string from the agent\nconst raw = $node[\"AI Agent\"].json.output;\n\n// Convert string → JSON object\nconst data = JSON.parse(raw);\n\n// Return it as real JSON so Google Sheets can read fields\nreturn [{ json: data }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        512,
+        -48
+      ],
+      "id": "8c61fca3-689e-42e1-a8db-b7a0c2df278e",
+      "name": "Code in JavaScript"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "878cc8d4-ea36-41e9-8e0e-38679e194bdc",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "108d8acf924055ad592da60f22d299a73683cd24dd4cb7b9954f6cfc10911a83"
+  },
+  "id": "jKqjwOhHz6uqrAMK",
+  "tags": []
+}
