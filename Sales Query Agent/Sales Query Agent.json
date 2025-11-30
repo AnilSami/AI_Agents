@@ -1,0 +1,254 @@
+{
+  "name": "Sales Query Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "cea47156-54b7-4a1b-a899-7160fdd5b914",
+      "name": "Telegram Trigger",
+      "webhookId": "b27e755a-94ea-4fd1-a6c8-322e982701df",
+      "credentials": {
+        "telegramApi": {
+          "id": "{{TELEGRAM_BOT_TOKEN}}",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a sales analytics assistant inside an automation system (n8n).\n\nYour job:\n- The user will ask for sales between a start date and an end date.\n- You must:\n  1) Understand the date range.\n  2) Use the available tools (Google Sheets / calculator) to get real data.\n  3) Return the result ONLY as a flat JSON object with simple key-value pairs.\n\nDates:\n- The user may write dates like: \"2025-10-31\", \"Oct 31, 2025\", \"October 31 to November 30\", etc.\n- Convert the dates to strict ISO format: YYYY-MM-DD.\n\nYou have access to:\n1) A Google Sheets tool (\"SalesSheet\") that can return all sales rows between start_date and end_date.\n   - Each row has at least: order_date, total_amount, profit_amount, order_id.\n2) A Calculator tool that can sum numbers and count items.\n\nYour workflow:\n1) Parse the start and end date from the user message.\n2) Convert them to YYYY-MM-DD format.\n3) Call the SalesSheet tool to get all rows between start_date and end_date (inclusive).\n4) From the returned rows, collect all values from the \"total_amount\" column.\n5) Use the Calculator tool to:\n   - Sum all total_amount values -> total_sales\n   - Count the rows -> total_orders\n6) Return a FINAL answer ONLY as flat JSON, with this structure:\n\n{\n  \"start_date\": \"YYYY-MM-DD\",\n  \"end_date\": \"YYYY-MM-DD\",\n  \"total_sales\": <number>,\n  \"total_orders\": <integer>,\n  \"currency\": \"USD\",\n  \"status\": \"success\"\n}\n\nRules:\n- Do NOT nest objects or arrays. All keys must be top-level.\n- Do NOT return any text outside JSON.\n- Do NOT calculate totals by yourself; always rely on the tools.\n- If dates are unclear, or no data is found, or tools fail, return:\n\n{\n  \"status\": \"error\",\n  \"note\": \"Short explanation of what went wrong.\"\n}\n\nExample user input:\n\"What are the sales between October 31, 2025 and November 30, 2025?\"\n\nExample JSON response:\n{\n  \"start_date\": \"2025-10-31\",\n  \"end_date\": \"2025-11-30\",\n  \"total_sales\": 18500.5,\n  \"total_orders\": 42,\n  \"currency\": \"USD\",\n  \"status\": \"success\"\n}\n",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "8034c415-0b56-422f-baec-adaa8c71f59e",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        80,
+        208
+      ],
+      "id": "e335b514-b2b5-47fe-9630-5bb0267b9d40",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "{{OPENAI_API_TOKEN}}",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.message.chat.id }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        224,
+        208
+      ],
+      "id": "2a7a05b4-d860-470f-bf27-09153e08cbb4",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "11jW8OX2iYgktat8UZoCh1pQ-5j2wsQJUp-apmi2dBW8",
+          "mode": "list",
+          "cachedResultName": "n8n sheet",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/11jW8OX2iYgktat8UZoCh1pQ-5j2wsQJUp-apmi2dBW8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 784962752,
+          "mode": "list",
+          "cachedResultName": "Sales",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/11jW8OX2iYgktat8UZoCh1pQ-5j2wsQJUp-apmi2dBW8/edit#gid=784962752"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        304,
+        336
+      ],
+      "id": "7a4b0d9e-861f-45dc-aa89-eefab6511880",
+      "name": "Get row(s) in sheet in Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "{{GOOGLE_SHEET_API}}",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "=The overall sales from start_date - {{ $json.start_date }} to end_date {{ $json.end_date }} is = {{ $json.total_sales }}.",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        784,
+        0
+      ],
+      "id": "af1753a5-940a-4b8a-9f94-6bf582a26daf",
+      "name": "Send a text message",
+      "webhookId": "b2245444-30de-4aca-bff6-d1a4538b3f3e",
+      "credentials": {
+        "telegramApi": {
+          "id": "{{TELEGRAM_BOT_TOKEN}}",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolCalculator",
+      "typeVersion": 1,
+      "position": [
+        528,
+        336
+      ],
+      "id": "815f8617-a1e3-4928-b308-bf94d067142a",
+      "name": "Calculator"
+    },
+    {
+      "parameters": {
+        "jsCode": "// \"output\" is a string that contains JSON.\n// We parse it and return it as a proper JSON object.\n\nconst raw = $json.output;           // e.g. \"{\\n  \\\"total_sales\\\": 18500.5, ... }\"\nconst parsed = JSON.parse(raw);     // now parsed.total_sales, parsed.start_date, etc.\n\n// Return as a new item with flat fields\nreturn [parsed];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        560,
+        0
+      ],
+      "id": "e4eecdeb-fe32-435f-8a47-e12e9f545fce",
+      "name": "Code in JavaScript"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet in Google Sheets": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculator": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "d8253f24-241c-4d1d-b78f-fc51300d937c",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "a6427e9c6191c596a2be4b1e24537bb9c019e16b49b309847952a278f84efb79"
+  },
+  "id": "eWt4LBO6sxf2HaWs",
+  "tags": []
+}
