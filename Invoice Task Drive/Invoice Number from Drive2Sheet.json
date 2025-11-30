@@ -34,7 +34,7 @@
       "name": "OpenAI Chat Model",
       "credentials": {
         "openAiApi": {
-          "id": "HtljYl8ho4bAwl5b",
+          "id": "{{OPENAI_API_TOKEN}}",
           "name": "OpenAi account"
         }
       }
@@ -79,7 +79,7 @@
       "name": "Download file",
       "credentials": {
         "googleDriveOAuth2Api": {
-          "id": "1jd9d8BQ6CDGNX0w",
+          "id": "{{Google_API_TOKEN}}",
           "name": "Google Drive account"
         }
       }
@@ -208,7 +208,7 @@
       "name": "Append row in sheet",
       "credentials": {
         "googleSheetsOAuth2Api": {
-          "id": "OmTFsdLdtVelEgPT",
+          "id": "{{Google_API_TOKEN}}",
           "name": "Google Sheets account"
         }
       }
