@@ -48,6 +48,11 @@ What are the sales between 2025-10-31 and 2025-11-30?
 
 ```
 
+## Output 
+
+<img width="911" height="127" alt="image" src="https://github.com/user-attachments/assets/9a814919-55f3-4c72-968b-57b41c52ba63" />
+
+
 ## 📷 Workflow Screenshot
 
 <img width="1145" height="592" alt="WorkFlow" src="https://github.com/user-attachments/assets/58971bbd-16fc-4bdf-8dbd-8d068ac301ac" />
