@@ -48,6 +48,11 @@ What are the sales between 2025-10-31 and 2025-11-30?
 
 ```
 
+## 📷 Workflow Screenshot
+
+<img width="1145" height="592" alt="WorkFlow" src="https://github.com/user-attachments/assets/58971bbd-16fc-4bdf-8dbd-8d068ac301ac" />
+
+
 ## 🔮 Possible Future Improvements
 
 * Profit breakdown
