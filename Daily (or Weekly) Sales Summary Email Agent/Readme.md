@@ -70,6 +70,32 @@ Daily Sales Summary Agent
 
 <img width="1326" height="417" alt="image" src="https://github.com/user-attachments/assets/475d27e2-d6a1-48a2-9540-43d850118b5d" />
 
+
+## 📄 Input File Format (Google Sheet)
+
+Your Google Sheet must contain the following columns:
+
+| Column Name     | Description                                 |
+|-----------------|---------------------------------------------|
+| `order_date`    | The date of the order (YYYY-MM-DD format)   |
+| `order_id`      | Unique identifier for each order            |
+| `product_name`  | Name of the product sold                    |
+| `quantity`      | Number of units sold                        |
+| `total_amount`  | Total sale value for the order              |
+| `currency`      | Currency code (e.g., USD)                   |
+
+### ✅ Example Row
+
+| order_date  | order_id | product_name         | quantity | total_amount | currency |
+|-------------|----------|----------------------|----------|--------------|----------|
+| 2025-12-01  | ORD-1011 | Galaxy Buds Pro 3    | 1        | 249.00       | USD      |
+
+### 📝 Notes
+
+- The agent will filter rows matching **today’s date**.  
+- Make sure the column names match exactly.  
+- The sheet must be accessible through your n8n Google Sheets credential.  
+
 ## 🔮 Possible Future Improvements
 
 * Weekly sales summary
