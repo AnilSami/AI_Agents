@@ -1,0 +1,346 @@
+{
+  "name": "Yelp InfoGather",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -240,
+        0
+      ],
+      "id": "372ec4da-3fbf-40c7-a9b4-85de9dd23a70",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "url": "https://api.yelp.com/v3/businesses/search",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "term",
+              "value": "bars"
+            },
+            {
+              "name": "location",
+              "value": "33612, Tampa, FL, US"
+            },
+            {
+              "name": "limit",
+              "value": "50"
+            },
+            {
+              "name": "offset",
+              "value": "=200"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer API_KEY"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        80,
+        0
+      ],
+      "id": "8a6edf8e-7332-46ab-b9b6-62d549f0282d",
+      "name": "InfoGather from Yelp"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "39f9ff64-ef47-48a4-8431-f56cad0bbd76",
+              "name": "name",
+              "value": "={{$json.businesses.name}}",
+              "type": "string"
+            },
+            {
+              "id": "9554dbeb-bb2f-4af0-ae7c-1724aee55d00",
+              "name": "address",
+              "value": "={{$json.businesses.location.address1}}, {{$json.businesses.location.city}}, {{$json.businesses.location.state}} {{$json.businesses.location.zip_code}}",
+              "type": "string"
+            },
+            {
+              "id": "8b96b9c3-e167-44f4-a091-20f18929bbb5",
+              "name": "phone",
+              "value": "={{$json.businesses.phone}}",
+              "type": "string"
+            },
+            {
+              "id": "c87c0911-3aec-4529-ac92-b157d8521514",
+              "name": "website",
+              "value": "={{$json.businesses.url || \"\"}}",
+              "type": "string"
+            },
+            {
+              "id": "b8235add-69a0-40d9-99c1-eadda7b8b42d",
+              "name": "email",
+              "value": "={{$json.businesses.email || \"\"}}",
+              "type": "string"
+            },
+            {
+              "id": "6046501b-9500-41cb-b9d9-852508b9b176",
+              "name": "zipcode",
+              "value": "={{$json.businesses.location.zip_code || \"\"}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        944,
+        -16
+      ],
+      "id": "7d3bd860-3cb5-4020-93ae-7e04a25db94e",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "businesses",
+        "include": "allOtherFields",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        672,
+        -16
+      ],
+      "id": "903bfc17-d595-4e5c-a682-322665d907d9",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "list",
+          "cachedResultName": "Testing Sheet",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1WyLKqjAKijyX-xF6oQYhfzhQ4TUj7MfFDRrweQteAgc/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sample Sheet",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1WyLKqjAKijyX-xF6oQYhfzhQ4TUj7MfFDRrweQteAgc/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Bar_name ": "={{ $json.name }}",
+            "Address": "={{ $json.address }}",
+            "Phone ": "={{ $json.phone }}",
+            "Website ": "={{ $json.website }}",
+            "Email ": "={{ $json.email }}",
+            "ZipCode": "={{ $json.zipcode }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Bar_name ",
+              "displayName": "Bar_name ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Address",
+              "displayName": "Address",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Phone ",
+              "displayName": "Phone ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Website ",
+              "displayName": "Website ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Email ",
+              "displayName": "Email ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "ZipCode",
+              "displayName": "ZipCode",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1184,
+        -16
+      ],
+      "id": "201275d2-6146-407c-b3a4-b2b5d848b174",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "1ab9d327-1daa-43b2-a2cd-5244167163c2",
+              "leftValue": "={{$json.businesses.length}}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        352,
+        0
+      ],
+      "id": "93fe78f5-a0c5-430d-be98-75f51fd98311",
+      "name": "If"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "InfoGather from Yelp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "InfoGather from Yelp": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        []
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "ec7860fa-f284-470c-95fe-b6b1d57c5dba",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "a6427e9c6191c596a2be4b1e24537bb9c019e16b49b309847952a278f84efb79"
+  },
+  "id": "DCY6yMsKdah6ZScG",
+  "tags": []
+}
