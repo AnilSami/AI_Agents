@@ -75,6 +75,12 @@ Manual / Scheduled Trigger
 
 ---
 
+### 🔹 Business Process Automations
+
+- 🍸 Business Lead & Owner Data Automation (Yelp-based)  
+  End-to-end n8n workflow that automates Yelp business data collection, enrichment, and export to Google Sheets.
+
+
 ## 👨‍💻 Author
 Anil Samineni  
 Business Process Automation | n8n | API Integrations | AI Agents
